@@ -3,7 +3,11 @@
 // exercises in this workspace — see aadit-throw-and-pinch, which uses
 // @mediapipe/tasks-vision's HandLandmarker the same way).
 //
-// Maps: right-arm angle -> n, left-arm angle -> h, nose position -> x,y pan.
+// Maps: right-hand height -> n, left-hand height -> h, nose position -> x,y
+// pan. Height is cartesian (wrist y relative to shoulder, normalized by
+// torso size) rather than an arm angle - avoids the atan2 noise blowup
+// when the arm is bent close to the body, and "raise your hand" is a more
+// directly discoverable gesture than "angle your arm just so".
 // Up to 2 people can be in frame; the larger/closer one is picked initially,
 // then tracking stays "locked" to whichever detected pose is nearest the
 // previously-locked position each frame, so it doesn't flicker between two
@@ -55,16 +59,20 @@ function personAnchor(lm) {
   return lm[NOSE] || lm[L_SHOULDER] || lm[R_SHOULDER] || null;
 }
 
-// Angle of an arm (shoulder->wrist): 0 = hanging straight down, PI = raised
-// straight up, PI/2 = out to the side. abs() folds "out to the left" and
-// "out to the right" of that one arm onto the same 0..PI range.
-function armAngle(lm, shoulderIdx, wristIdx) {
-  const s = lm[shoulderIdx],
-    w = lm[wristIdx];
-  if (!s || !w) return null;
-  const dx = w.x - s.x,
-    dy = w.y - s.y;
-  return Math.abs(Math.atan2(dx, dy));
+// Hand height relative to the body, normalized to roughly 0..1: 0 = wrist
+// at hip height, 1 = wrist raised about a torso-height above the shoulder
+// (comfortably overhead). Scaled by shoulder-to-hip distance so it stays
+// consistent regardless of how far the person is from the camera, and
+// unlike an angle it's a direct coordinate difference - no atan2, so no
+// noise amplification when the hand is close to the shoulder.
+function handHeight(lm, shoulderIdx, wristIdx, hipIdx) {
+  const shoulder = lm[shoulderIdx],
+    wrist = lm[wristIdx],
+    hip = lm[hipIdx];
+  if (!shoulder || !wrist || !hip) return null;
+  const torso = Math.max(0.05, Math.abs(hip.y - shoulder.y));
+  const raised = (shoulder.y - wrist.y) / torso; // >0 above shoulder, <0 below
+  return Math.min(1, Math.max(0, (raised + 1) / 3)); // -1 (hip)..+2 (overhead) -> 0..1
 }
 
 export function createGestureController(videoEl, overlayCanvas) {
@@ -242,12 +250,12 @@ export function createGestureController(videoEl, overlayCanvas) {
       return;
     }
 
-    const rAngle = armAngle(chosen, R_SHOULDER, R_WRIST);
-    const lAngle = armAngle(chosen, L_SHOULDER, L_WRIST);
+    const rHeight = handHeight(chosen, R_SHOULDER, R_WRIST, R_HIP);
+    const lHeight = handHeight(chosen, L_SHOULDER, L_WRIST, L_HIP);
     const anchor = personAnchor(chosen);
 
-    if (rAngle !== null) smoothed.nT = lerp(smoothed.nT, Math.min(1, rAngle / Math.PI), SMOOTH);
-    if (lAngle !== null) smoothed.hT = lerp(smoothed.hT, Math.min(1, lAngle / Math.PI), SMOOTH);
+    if (rHeight !== null) smoothed.nT = lerp(smoothed.nT, rHeight, SMOOTH);
+    if (lHeight !== null) smoothed.hT = lerp(smoothed.hT, lHeight, SMOOTH);
     if (anchor) {
       smoothed.x = lerp(smoothed.x, anchor.x, SMOOTH);
       smoothed.y = lerp(smoothed.y, anchor.y, SMOOTH);
