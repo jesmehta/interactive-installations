@@ -45,8 +45,7 @@ imageInput.addEventListener('change', (event) => {
 // --- mouse drives location x,y (pans the sampled triangle over the image) ---
 window.addEventListener('mousemove', (event) => {
   const x = event.clientX / window.innerWidth;
-  // Flip y: WebGL's gl_FragCoord is bottom-up, mouse clientY is top-down.
-  const y = 1 - event.clientY / window.innerHeight;
+  const y = event.clientY / window.innerHeight;
   kaleidoscope.state.locX = x;
   kaleidoscope.state.locY = y;
   locVal.textContent = `${x.toFixed(2)}, ${y.toFixed(2)}`;
