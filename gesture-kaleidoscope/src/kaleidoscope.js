@@ -34,13 +34,15 @@ precision highp float;
 
 uniform vec2 uResolution;
 uniform vec2 uImageSize;
-uniform float uN;            // centred mode: polygon number, 3..12
+uniform float uN;            // centred mode: polygon number, continuous (lets it morph smoothly between integers)
 uniform float uH;            // cell/triangle size, fraction of min(canvas dimension)
 uniform vec2 uLocation;      // 0..1, pan within the source image
 uniform sampler2D uImage;
 uniform float uHasImage;
 uniform float uMode;         // 0 = centred, 1 = tessellating
-uniform float uTessIndex;    // 0..7, which tessellation preset
+uniform float uTessFrom;     // tessellating mode: preset being crossfaded from
+uniform float uTessTo;       // tessellating mode: preset being crossfaded to
+uniform float uTessBlend;    // 0..1 crossfade progress from->to
 
 const float TWO_PI = 6.28318530718;
 const float PI = 3.14159265359;
@@ -152,25 +154,35 @@ vec2 tessOffset(vec2 p, float index, float cell) {
   return mirrorOffset(local, n);
 }
 
+vec3 sampleColor(vec2 offset, float minDim) {
+  vec2 sampleUV = uLocation + offset / minDim;
+  sampleUV = vec2(mirrorWrap(sampleUV.x), mirrorWrap(sampleUV.y));
+  if (uHasImage > 0.5) {
+    return texture2D(uImage, sampleUV).rgb;
+  }
+  return vec3(0.08 + 0.05 * sin(sampleUV.x * 40.0), 0.08, 0.1 + 0.05 * cos(sampleUV.y * 40.0));
+}
+
 void main() {
   vec2 p = gl_FragCoord.xy - 0.5 * uResolution;
   float H = max(uH * min(uResolution.x, uResolution.y), 1.0);
-
-  vec2 offset;
-  if (uMode < 0.5) {
-    offset = centredOffset(p, max(floor(uN + 0.5), 3.0), H);
-  } else {
-    offset = tessOffset(p, floor(uTessIndex + 0.5), H);
-  }
-
-  vec2 sampleUV = uLocation + offset / min(uResolution.x, uResolution.y);
-  sampleUV = vec2(mirrorWrap(sampleUV.x), mirrorWrap(sampleUV.y));
+  float minDim = min(uResolution.x, uResolution.y);
 
   vec3 color;
-  if (uHasImage > 0.5) {
-    color = texture2D(uImage, sampleUV).rgb;
+  if (uMode < 0.5) {
+    // Continuous (not rounded) n, so slider/gesture changes morph smoothly
+    // through fractional wedge-counts instead of popping between integers.
+    vec2 offset = centredOffset(p, max(uN, 3.0), H);
+    color = sampleColor(offset, minDim);
   } else {
-    color = vec3(0.08 + 0.05 * sin(sampleUV.x * 40.0), 0.08, 0.1 + 0.05 * cos(sampleUV.y * 40.0));
+    // Tessellating presets can switch lattice type entirely (e.g. square ->
+    // hex), which has no meaningful numeric interpolation — so instead we
+    // crossfade between the two presets' sampled colors.
+    vec2 offsetFrom = tessOffset(p, floor(uTessFrom + 0.5), H);
+    vec2 offsetTo = tessOffset(p, floor(uTessTo + 0.5), H);
+    vec3 colorFrom = sampleColor(offsetFrom, minDim);
+    vec3 colorTo = sampleColor(offsetTo, minDim);
+    color = mix(colorFrom, colorTo, uTessBlend);
   }
 
   gl_FragColor = vec4(color, 1.0);
@@ -239,7 +251,9 @@ export function createKaleidoscope(canvas) {
     uImage: gl.getUniformLocation(program, 'uImage'),
     uHasImage: gl.getUniformLocation(program, 'uHasImage'),
     uMode: gl.getUniformLocation(program, 'uMode'),
-    uTessIndex: gl.getUniformLocation(program, 'uTessIndex'),
+    uTessFrom: gl.getUniformLocation(program, 'uTessFrom'),
+    uTessTo: gl.getUniformLocation(program, 'uTessTo'),
+    uTessBlend: gl.getUniformLocation(program, 'uTessBlend'),
   };
 
   const texture = gl.createTexture();
@@ -249,6 +263,13 @@ export function createKaleidoscope(canvas) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
+  // state.n / state.h / state.tessIndex are TARGET values — callers (slider
+  // handlers, gesture input) just assign them directly, same as before. The
+  // actual values sent to the shader are eased toward those targets here,
+  // so every change (slider drag, gesture update) animates instead of
+  // popping. n/h morph as continuous numbers; tessIndex (which can jump
+  // between structurally different lattices) crossfades in the shader
+  // instead, via tessAnim's from/to/blend.
   const state = {
     mode: 0, // 0 = centred, 1 = tessellating
     n: 6,
@@ -259,6 +280,39 @@ export function createKaleidoscope(canvas) {
     hasImage: false,
     imageSize: [1, 1],
   };
+
+  const TRANSITION_MS = 320;
+  function smoothstep(t) {
+    return t * t * (3 - 2 * t);
+  }
+  function makeAnim(initial) {
+    return { from: initial, to: initial, start: 0 };
+  }
+  function animValueAt(anim, now) {
+    const t = Math.min(1, (now - anim.start) / TRANSITION_MS);
+    return anim.from + (anim.to - anim.from) * smoothstep(t);
+  }
+  function animSetTarget(anim, target, now) {
+    if (target === anim.to) return;
+    anim.from = animValueAt(anim, now);
+    anim.to = target;
+    anim.start = now;
+  }
+
+  const nAnim = makeAnim(state.n);
+  const hAnim = makeAnim(state.h);
+  // tessAnim doesn't carry an interpolated value — from/to are the two preset
+  // indices to crossfade between, and blend is how far through that fade we are.
+  const tessAnim = { from: state.tessIndex, to: state.tessIndex, start: 0 };
+  function tessBlendAt(now) {
+    return smoothstep(Math.min(1, (now - tessAnim.start) / TRANSITION_MS));
+  }
+  function tessSetTarget(target, now) {
+    if (target === tessAnim.to) return;
+    tessAnim.from = tessAnim.to;
+    tessAnim.to = target;
+    tessAnim.start = now;
+  }
 
   function setImage(imageSource) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -274,6 +328,11 @@ export function createKaleidoscope(canvas) {
   }
 
   function render() {
+    const now = performance.now();
+    animSetTarget(nAnim, state.n, now);
+    animSetTarget(hAnim, state.h, now);
+    tessSetTarget(state.tessIndex, now);
+
     gl.useProgram(program);
     gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
     gl.enableVertexAttribArray(aPosition);
@@ -281,12 +340,14 @@ export function createKaleidoscope(canvas) {
 
     gl.uniform2f(uniforms.uResolution, canvas.width, canvas.height);
     gl.uniform2f(uniforms.uImageSize, state.imageSize[0], state.imageSize[1]);
-    gl.uniform1f(uniforms.uN, state.n);
-    gl.uniform1f(uniforms.uH, state.h);
+    gl.uniform1f(uniforms.uN, animValueAt(nAnim, now));
+    gl.uniform1f(uniforms.uH, animValueAt(hAnim, now));
     gl.uniform2f(uniforms.uLocation, state.locX, state.locY);
     gl.uniform1f(uniforms.uHasImage, state.hasImage ? 1 : 0);
     gl.uniform1f(uniforms.uMode, state.mode);
-    gl.uniform1f(uniforms.uTessIndex, state.tessIndex);
+    gl.uniform1f(uniforms.uTessFrom, tessAnim.from);
+    gl.uniform1f(uniforms.uTessTo, tessAnim.to);
+    gl.uniform1f(uniforms.uTessBlend, tessBlendAt(now));
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);

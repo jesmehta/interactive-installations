@@ -135,6 +135,25 @@ window.addEventListener('mousemove', (event) => {
   locVal.textContent = `${x.toFixed(2)}, ${y.toFixed(2)}`;
 });
 
+// --- hysteresis bucketing for gesture-driven n / pattern selection ---
+// Raw pose-angle noise can sit right on a bucket boundary and flip back and
+// forth every frame. A bucketer only accepts a new bucket once the input has
+// moved convincingly (by `margin` extra bucket-widths) past the boundary
+// with the *current* bucket, so small jitter near an edge holds steady.
+function createHysteresisBucketer(count, initialIndex, margin = 0.18) {
+  let current = initialIndex;
+  return (t01) => {
+    const raw = Math.min(1, Math.max(0, t01)) * (count - 1);
+    if (raw < current - 0.5 - margin || raw > current + 0.5 + margin) {
+      current = Math.round(raw);
+    }
+    return current;
+  };
+}
+
+const nBucketer = createHysteresisBucketer(10, 3); // n = 3..12 -> bucket index n-3, starts at n=6
+const tessBucketer = createHysteresisBucketer(TESS_PRESETS.length, 2); // starts at Hexagonal
+
 // --- apply gesture output each frame when Gesture input mode is active ---
 function applyGesture() {
   gestureStatus.textContent = gesture.statusMessage || gesture.status;
@@ -143,11 +162,11 @@ function applyGesture() {
   const { nT, hT, x, y } = gesture.output;
 
   if (kaleidoscope.state.mode === 0) {
-    const n = Math.round(3 + nT * 9); // 3..12
+    const n = 3 + nBucketer(nT); // 3..12
     kaleidoscope.state.n = n;
     nSlider.value = n;
   } else {
-    const idx = Math.round(nT * (TESS_PRESETS.length - 1));
+    const idx = tessBucketer(nT);
     kaleidoscope.state.tessIndex = idx;
     nSlider.value = idx;
   }
