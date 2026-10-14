@@ -95,6 +95,41 @@ real changes animate instead of pop.
 >
 > **"use bucket intervals instead of absolute values ?"**
 
+**Cartesian hand height over polar arm angle, for the same reason as the
+bucketing fix: match the actual failure mode.** The original phase-2 spec
+asked for arm *angle*, computed via `atan2` of the shoulder→wrist vector.
+That has a real flaw: angle is noisy exactly when the vector is short
+(arm bent close to the body), since a small positional wobble swings the
+angle a lot — more pose jitter precisely where control should feel most
+stable. Hand *height* (wrist y relative to shoulder, normalized by
+shoulder-to-hip distance so it's consistent regardless of distance from
+the camera) is a direct coordinate difference with no such blowup, and
+"raise your hand" is a more directly discoverable gesture than "angle
+your arm just so" — better control and better discoverability from the
+same change.
+
+> **"can the controls be mapped not to the angle of the arms but the
+> vertical location of the respective hand - cartesian instead of polar,
+> will reduce the jitter and make it easier to control, better
+> discoverability"**
+
+**2-pass target-bitrate encoding for exact file-size limits, not CRF.**
+CRF targets a *quality* level, not a size — fine for "compress without
+much quality loss," but useless for "must fit under WhatsApp's 180MB
+cap." For that, 2-pass encoding computes the bitrate needed for the
+video's actual duration, then hits it accurately. (Hit one real bug
+along the way: pass 1 used `-preset fast` and pass 2 used `-preset
+medium` for speed, but libx264 requires matching encoder settings —
+specifically weighted-prediction mode — between passes; mismatched
+presets made pass 2 fail outright. Fixed by using the same preset for
+both passes.) Also worth knowing: this specific content (a constantly
+morphing, densely tessellated kaleidoscope) is close to worst-case for
+H.264 — near-zero frame-to-frame redundancy — so an initial attempt at a
+near-lossless CRF actually produced a *larger* file than the source.
+
+> **"whatsapp has a 180 mb file limit, so give me the 90 mb version and a
+> 170 mb version"**
+
 **Crossfade, not numeric interpolation, for tessellating-preset
 switches.** `n` and `h` are continuous quantities, so morphing them as
 plain numbers (even through fractional, not-quite-an-integer wedge
@@ -153,16 +188,26 @@ rather than invented fresh.
   > **"the project has been moved to
   > D:\Projects\interactive-installations\gesture-kaleidoscope"**
 
+- **Gesture mapping switched from arm angle to hand height** — cartesian
+  (wrist height relative to shoulder, normalized by torso size) instead
+  of polar (shoulder→wrist angle), to cut jitter and improve
+  discoverability. Right hand → n/pattern, left hand → h, same as before.
+- **Demo video compression** — a 1080p30 screen capture of the live
+  kaleidoscope (`demo/Kaledoscope_demo.mp4`, ~244MB, no audio) compressed
+  to two WhatsApp-safe sizes via 2-pass bitrate targeting:
+  `Kaledoscope_demo-90mb.mp4` (~87MB) and `Kaledoscope_demo-170mb.mp4`
+  (~164MB). All three live in `demo/`, which is gitignored rather than
+  committed.
+
 ## Notes
 
 - Dev server must bind IPv4 explicitly (`npm run dev -- --port 5183 --host
   127.0.0.1`) — the Vite default bound IPv6-only `::1`, which the
   browser couldn't reach.
-- The repo's `origin` remote (`github.com/jesmehta/interactive-installations`)
-  is configured but the local branch's upstream tracking shows as "gone"
-  — nothing has been pushed from this session; flagging in case that's
-  unexpected.
-- Gesture mapping (arm-angle range, smoothing feel, lock behavior with two
-  people) was verified mechanically (loads, runs, no errors, against a
-  fake camera device) but not for actual feel, which needs a real person
-  in front of a real webcam.
+- Gesture mapping (hand-height range, smoothing feel, lock behavior with
+  two people) was verified mechanically (loads, runs, no errors, against
+  a fake camera device) but not for actual feel, which needs a real
+  person in front of a real webcam.
+- `public/ajrakh_print.jpg` is sitting untracked in the working tree (not
+  created by any documented change here) — likely a test image loaded
+  during manual testing; left alone rather than assumed to be cleanup.
