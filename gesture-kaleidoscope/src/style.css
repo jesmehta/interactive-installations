@@ -128,6 +128,48 @@ body.hide-controls #controls {
   font-weight: 600;
 }
 
+.gesture-panel {
+  margin-bottom: 14px;
+  padding-top: 2px;
+}
+
+.gesture-panel #cameraBtn {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.gesture-panel #cameraBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.cam-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.cam-preview video,
+.cam-preview canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
 #fullscreenBtn {
   width: 100%;
   padding: 8px 10px;

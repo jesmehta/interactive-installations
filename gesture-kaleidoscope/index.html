@@ -39,8 +39,32 @@
         </label>
 
         <div class="row readout">
-          <span>location (mouse-driven)</span>
+          <span id="locLabel">location (mouse-driven)</span>
           <span id="locVal">0.50, 0.50</span>
+        </div>
+
+        <div class="row">
+          <span>Input</span>
+          <div class="segmented">
+            <button type="button" id="inputMouse" class="active">Mouse</button>
+            <button type="button" id="inputGesture">Gesture</button>
+          </div>
+        </div>
+
+        <div id="gesturePanel" class="gesture-panel" hidden>
+          <button type="button" id="cameraBtn">Enable camera</button>
+          <div class="row readout">
+            <span>status</span>
+            <span id="gestureStatus">off</span>
+          </div>
+          <div class="cam-preview">
+            <video id="gestureVideo" playsinline muted></video>
+            <canvas id="gestureOverlay"></canvas>
+          </div>
+          <p class="note">
+            Right arm angle → n. Left arm angle → h. Face position → x,y. Locks onto whoever's
+            larger/closer if more than one person is in frame.
+          </p>
         </div>
 
         <button id="fullscreenBtn">Go fullscreen</button>
