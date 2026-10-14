@@ -51,27 +51,7 @@ window.addEventListener('mousemove', (event) => {
   locVal.textContent = `${x.toFixed(2)}, ${y.toFixed(2)}`;
 });
 
-// --- click (not drag) and Space toggle the controls overlay ---
-let pointerDownPos = null;
-let pointerDownTime = 0;
-
-window.addEventListener('pointerdown', (event) => {
-  pointerDownPos = { x: event.clientX, y: event.clientY };
-  pointerDownTime = performance.now();
-});
-
-window.addEventListener('pointerup', (event) => {
-  if (!pointerDownPos) return;
-  const dx = event.clientX - pointerDownPos.x;
-  const dy = event.clientY - pointerDownPos.y;
-  const moved = Math.hypot(dx, dy);
-  const elapsed = performance.now() - pointerDownTime;
-  pointerDownPos = null;
-  if (moved < 6 && elapsed < 400) {
-    toggleControls();
-  }
-});
-
+// --- Space toggles the controls overlay ---
 window.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
     event.preventDefault();
