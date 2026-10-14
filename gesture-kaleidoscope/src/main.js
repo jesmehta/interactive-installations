@@ -1,15 +1,17 @@
-import { createKaleidoscope } from './kaleidoscope.js';
+import { createKaleidoscope, TESS_PRESETS } from './kaleidoscope.js';
 
 const canvas = document.getElementById('glcanvas');
 const kaleidoscope = createKaleidoscope(canvas);
 
 const nSlider = document.getElementById('nSlider');
 const hSlider = document.getElementById('hSlider');
-const nVal = document.getElementById('nVal');
+const nLabel = document.getElementById('nLabel');
 const hVal = document.getElementById('hVal');
 const locVal = document.getElementById('locVal');
 const imageInput = document.getElementById('imageInput');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
+const modeCenteredBtn = document.getElementById('modeCentered');
+const modeTessBtn = document.getElementById('modeTess');
 
 function resizeCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -19,10 +21,46 @@ window.addEventListener('resize', resizeCanvas);
 document.addEventListener('fullscreenchange', resizeCanvas);
 resizeCanvas();
 
+// --- mode switch ---
+function setMode(mode) {
+  kaleidoscope.state.mode = mode;
+  modeCenteredBtn.classList.toggle('active', mode === 0);
+  modeTessBtn.classList.toggle('active', mode === 1);
+  if (mode === 0) {
+    nSlider.min = 3;
+    nSlider.max = 12;
+    nSlider.step = 1;
+    nSlider.value = kaleidoscope.state.n;
+    updateNLabel();
+  } else {
+    nSlider.min = 0;
+    nSlider.max = TESS_PRESETS.length - 1;
+    nSlider.step = 1;
+    nSlider.value = kaleidoscope.state.tessIndex;
+    updateNLabel();
+  }
+}
+
+function updateNLabel() {
+  if (kaleidoscope.state.mode === 0) {
+    nLabel.textContent = `n (sides): ${nSlider.value}`;
+  } else {
+    nLabel.textContent = `Pattern: ${TESS_PRESETS[Number(nSlider.value)]}`;
+  }
+}
+
+modeCenteredBtn.addEventListener('click', () => setMode(0));
+modeTessBtn.addEventListener('click', () => setMode(1));
+setMode(0);
+
 // --- slider inputs ---
 nSlider.addEventListener('input', () => {
-  kaleidoscope.state.n = Number(nSlider.value);
-  nVal.textContent = nSlider.value;
+  if (kaleidoscope.state.mode === 0) {
+    kaleidoscope.state.n = Number(nSlider.value);
+  } else {
+    kaleidoscope.state.tessIndex = Number(nSlider.value);
+  }
+  updateNLabel();
 });
 
 hSlider.addEventListener('input', () => {

@@ -105,6 +105,29 @@ body.hide-controls #controls {
   color: #fff;
 }
 
+.segmented {
+  display: flex;
+  gap: 6px;
+}
+
+.segmented button {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: #fff;
+  color: #111;
+  border-color: #fff;
+  font-weight: 600;
+}
+
 #fullscreenBtn {
   width: 100%;
   padding: 8px 10px;
