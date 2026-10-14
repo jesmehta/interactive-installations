@@ -91,6 +91,11 @@ imageInput.addEventListener('change', (event) => {
   img.src = URL.createObjectURL(file);
 });
 
+// --- default image, so there's something to look at before loading your own ---
+const defaultImg = new Image();
+defaultImg.onload = () => kaleidoscope.setImage(defaultImg);
+defaultImg.src = '/seahorse.jpg';
+
 // --- input mode: Mouse vs Gesture ---
 let inputMode = 'mouse';
 
