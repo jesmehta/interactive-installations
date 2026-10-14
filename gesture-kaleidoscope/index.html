@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gesture Kaleidoscope</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="glcanvas"></canvas>
+
+    <div id="hint">click or press space to hide/show controls</div>
+
+    <div id="controls">
+      <div class="panel">
+        <h1>Gesture Kaleidoscope</h1>
+
+        <label class="row">
+          <span>Load image</span>
+          <input type="file" id="imageInput" accept="image/*" />
+        </label>
+
+        <label class="row">
+          <span>n (sides) <output id="nVal">6</output></span>
+          <input type="range" id="nSlider" min="3" max="12" step="1" value="6" />
+        </label>
+
+        <label class="row">
+          <span>h (height) <output id="hVal">0.30</output></span>
+          <input type="range" id="hSlider" min="0.03" max="1.2" step="0.01" value="0.30" />
+        </label>
+
+        <div class="row readout">
+          <span>location (mouse-driven)</span>
+          <span id="locVal">0.50, 0.50</span>
+        </div>
+
+        <button id="fullscreenBtn">Go fullscreen</button>
+
+        <p class="note">Move the mouse over the canvas to pan the sampled triangle across the loaded image.</p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
