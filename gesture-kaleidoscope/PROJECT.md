@@ -211,7 +211,15 @@ rather than invented fresh.
 
 ## Notes
 
-- Dev server must bind IPv4 explicitly (`npm run dev -- --port 5183 --host
+- **Network use is one-time.** Mouse mode and the default image need
+  nothing remote. The first "Enable camera" fetches `vision_bundle.mjs`, the
+  wasm fileset (jsDelivr, pinned `0.10.14`) and `pose_landmarker_lite.task`
+  (Google storage, `/latest/` path, so it may be cached for less time than
+  the pinned files). `poseLandmarker` is then kept in memory, so disabling
+  and re-enabling the camera doesn't fetch again. Inference runs locally
+  (GPU delegate), and frames are never sent anywhere. For a live show,
+  enable the camera once while the network is up and keep the tab open.
+- When using Vite: the dev server must bind IPv4 explicitly (`npm run dev -- --port 5183 --host
   127.0.0.1`) — the Vite default bound IPv6-only `::1`, which the
   browser couldn't reach.
 - Gesture mapping (hand-height range, smoothing feel, lock behavior with

@@ -41,4 +41,8 @@ before it had a proper home.
 
 - Needs camera permission, and browsers only grant camera access on
   `https://` or `localhost`. Opening `index.html` straight from Explorer
-  (`file://`) may block the camera, depending on the browser.
+  (`file://`) may block the camera, depending on the browser. Serve it
+  from a local static server instead (see the repo README).
+- **Network use is one-time.** p5 loads from jsDelivr when the page opens.
+  Everything after that, including the camera feed and all the filters,
+  runs locally.
