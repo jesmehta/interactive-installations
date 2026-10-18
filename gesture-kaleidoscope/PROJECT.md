@@ -198,6 +198,16 @@ rather than invented fresh.
   `Kaledoscope_demo-90mb.mp4` (~87MB) and `Kaledoscope_demo-170mb.mp4`
   (~164MB). All three live in `demo/`, which is gitignored rather than
   committed.
+- **Runs as a plain static page** (2026-10-18): `index.html` now references
+  `./src/...` instead of `/src/...`, and the default image moved from
+  `public/seahorse.jpg` (Vite serves `public/` at the site root) to
+  `assets/seahorse.jpg`, loaded by relative path. Vite was only ever acting
+  as a dev server here, since there are no npm dependencies and MediaPipe
+  comes from a CDN. The folder now works unbuilt from Live Server, any
+  static host or a GitHub Pages subpath, as well as from `npm run dev`. It
+  still won't run from `file://` (browsers block ES modules there) and
+  needs `https`/`localhost` for the camera. Linked from the repo-root
+  landing page alongside `video-filters/`.
 
 ## Notes
 
@@ -208,6 +218,6 @@ rather than invented fresh.
   two people) was verified mechanically (loads, runs, no errors, against
   a fake camera device) but not for actual feel, which needs a real
   person in front of a real webcam.
-- `public/ajrakh_print.jpg` is sitting untracked in the working tree (not
-  created by any documented change here) — likely a test image loaded
-  during manual testing; left alone rather than assumed to be cleanup.
+- An untracked `public/ajrakh_print.jpg` test image was noted here
+  earlier. It wasn't in this checkout when `public/` was retired
+  (2026-10-18), so it may still exist on the original `D:\Projects` copy.
