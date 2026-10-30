@@ -1,8 +1,6 @@
 # Magic Mirror
 
-Lives in `video-filters/`. It was called Video Filters here until
-2026-10-30; the folder keeps that name so the published URL
-(`/interactive-installations/video-filters/`) doesn't change.
+Called Video Filters (folder `video-filters/`) until 2026-10-30.
 
 ## Intent
 
@@ -40,6 +38,10 @@ before it had a proper home.
   page, thumbnail only) and merged with `--allow-unrelated-histories`. The
   page now loads p5 from jsDelivr. The SSD copy, its gallery card and the
   thumbnail were removed from SSD_CreativeCodingPage.
+- **2026-10-30**: published on FFFX. Renamed Magic Mirror, and the folder
+  `video-filters/` became `magic-mirror/`, so its FFFX URL is now
+  `/interactive-installations/magic-mirror/`. The old URL had been live for
+  a few hours and has no redirect.
 
 ## Notes
 

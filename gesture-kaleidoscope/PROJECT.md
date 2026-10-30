@@ -207,7 +207,7 @@ rather than invented fresh.
   static host or a GitHub Pages subpath, as well as from `npm run dev`. It
   still won't run from `file://` (browsers block ES modules there) and
   needs `https`/`localhost` for the camera. Linked from the repo-root
-  landing page alongside `video-filters/`.
+  landing page alongside `magic-mirror/`.
 
 ## Notes
 

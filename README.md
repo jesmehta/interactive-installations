@@ -6,11 +6,11 @@ festivals and similar), each in its own folder:
 | Folder                  | Piece                | Stack                                  |
 | ----------------------- | -------------------- | -------------------------------------- |
 | `gesture-kaleidoscope/` | Gesture Kaleidoscope | WebGL1 + MediaPipe pose tracking (CDN) |
-| `video-filters/`        | Magic Mirror         | p5.js (CDN)                            |
+| `magic-mirror/`         | Magic Mirror         | p5.js (CDN)                            |
 
 Try them online on Form follows f(x):
 <https://fffx.cabinetofcuriosities.in/interactive-installations/gesture-kaleidoscope/>
-and <https://fffx.cabinetofcuriosities.in/interactive-installations/video-filters/>,
+and <https://fffx.cabinetofcuriosities.in/interactive-installations/magic-mirror/>,
 or run them locally (below). Both ask for camera access; webcam frames
 stay in the browser.
 
@@ -60,10 +60,11 @@ Public repo, published in two places:
 
 - `gesture-kaleidoscope/` was started here (originally under
   `D:\Projects\`).
-- `video-filters/` came from `SSD_CreativeCodingPage`
+- `magic-mirror/` came from `SSD_CreativeCodingPage`
   (`ssd-creative-coding-2025-26/Video_filters/`, where it had been parked
   as a gallery card) on 2026-10-18. Its history was imported with a
   filtered `git filter-branch` and merged with `--allow-unrelated-histories`.
+  It was `video-filters/` (Video Filters) here until 2026-10-30.
 - Made public on 2026-10-30, under GPL-3.0-or-later, and mounted on fffx.
 
 ## Licence and terms
