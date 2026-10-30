@@ -208,8 +208,17 @@ rather than invented fresh.
   still won't run from `file://` (browsers block ES modules there) and
   needs `https`/`localhost` for the camera. Linked from the repo-root
   landing page alongside `magic-mirror/`.
+- **Published** (2026-10-30): the repository went public under
+  GPL-3.0-or-later, and FFFX mounts it at a pinned commit, so this piece is
+  live at `fffx.cabinetofcuriosities.in/interactive-installations/gesture-kaleidoscope/`
+  (Image Experiments). Only the page's own files are published there (FFFX's
+  allowlist); see the repo README's Hosting section.
 
 ## Notes
+
+- **To do: record where `assets/seahorse.jpg` came from**, or replace it
+  with an image of your own. It is published on FFFX and GitHub Pages, and
+  the code licence doesn't cover it.
 
 - **Network use is one-time.** Mouse mode and the default image need
   nothing remote. The first "Enable camera" fetches `vision_bundle.mjs`, the
