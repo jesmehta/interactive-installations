@@ -3,10 +3,10 @@
 Camera-driven browser pieces meant to be shown live (projected, at
 festivals and similar), each in its own folder:
 
-| Folder                  | Piece              | Stack                                    |
-| ----------------------- | ------------------ | ---------------------------------------- |
+| Folder                  | Piece                | Stack                                  |
+| ----------------------- | -------------------- | -------------------------------------- |
 | `gesture-kaleidoscope/` | Gesture Kaleidoscope | WebGL1 + MediaPipe pose tracking (CDN) |
-| `video-filters/`        | Video Filters ("Magic Mirror") | p5.js (CDN)                  |
+| `video-filters/`        | Magic Mirror         | p5.js (CDN)                            |
 
 Try them online on Form follows f(x):
 <https://fffx.cabinetofcuriosities.in/interactive-installations/gesture-kaleidoscope/>
@@ -74,7 +74,7 @@ Public repo, published in two places:
   distribute a modified version, including by hosting it on a website,
   you must make its source available under the same licence.
 - **Libraries loaded from CDNs** keep their own licences: p5.js (LGPL-2.1)
-  in Video Filters, and MediaPipe Tasks Vision and its pose landmarker
+  in Magic Mirror, and MediaPipe Tasks Vision and its pose landmarker
   model (Apache-2.0) in Gesture Kaleidoscope. They aren't stored in this repo.
 - **`gesture-kaleidoscope/assets/seahorse.jpg`**, the default image, isn't
   covered by the code licence. Its source is not recorded yet.

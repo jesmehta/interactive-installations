@@ -1,4 +1,8 @@
-# Video Filters
+# Magic Mirror
+
+Lives in `video-filters/`. It was called Video Filters here until
+2026-10-30; the folder keeps that name so the published URL
+(`/interactive-installations/video-filters/`) doesn't change.
 
 ## Intent
 
