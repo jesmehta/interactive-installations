@@ -34,9 +34,15 @@ root. No build step is needed. `gesture-kaleidoscope/` still works with
 
 ## Hosting
 
-Private repo, not published yet. GitHub Pages is planned once the site
-moves to Cloudflare. All paths are relative, so the repo works from a
-Pages subpath (`/interactive-installations/`) as it is.
+Published on Form follows f(x) (fffx), which mounts this repo at
+`/interactive-installations/` at a pinned commit (fffx's
+`content/external-repos.tsv`). The two pieces are listed there under
+Image Experiments, and fffx links to them directly. The root `index.html`
+is for local use and isn't published (fffx's allowlist leaves it out,
+together with the `.md` files and the Vite config). A push here changes
+nothing on fffx until its pin is moved (`npm run update-externals` in
+fffx). If a piece needs a new file, add it to fffx's
+`content/external-allowlists/interactive-installations.txt` too.
 
 ## History
 
